@@ -25,5 +25,11 @@ export const routes: Routes = [
     loadComponent: () => import("./features/planet/pages/planet-detail/planet-detail.component")
       .then(c => c.PlanetDetailComponent),
     canActivate:[isUserConnectedGuard]
+  },
+  {
+    path:"colonies",
+    loadComponent: () => import("./features/planet/pages/colony-list/colony-list.component")
+      .then(c => c.ColonyListComponent),
+    canActivate:[isUserConnectedGuard]
   }
 ];

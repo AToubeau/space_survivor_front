@@ -1,0 +1,8 @@
+<div class="p-4">
+  <h2 class="text-xl font-bold mb-4">Mes Colonies</h2>
+  <ul class="space-y-2">
+    <li *ngFor="let colony of colonyService.colonies()">
+      🌍 {{ colony.name }} <!--({{ colony.resources.water }} 💧, {{ colony.resources.metal }} 🔩)-->
+    </li>
+  </ul>
+</div>
