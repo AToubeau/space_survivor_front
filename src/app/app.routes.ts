@@ -7,7 +7,6 @@ export const routes: Routes = [
     path: "",
     loadComponent: () => import("./features/home/pages/home/home.component")
       .then(c => c.HomeComponent),
-    canActivate:[isUserDisconnectedGuard]
   },
   {
     path: "auth/login",

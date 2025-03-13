@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
   <h1 class="text-4xl font-bold mb-6">Bienvenue sur Space Survivor</h1>
 
-  <div class="flex space-x-4">
+  <div *ngIf="!authService.currentUser()" class="flex space-x-4">
     <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-xl shadow-lg"
     routerLink="auth/login">
       Connexion
@@ -10,5 +10,8 @@
     routerLink="/auth/register">
       Inscription
     </button>
+  </div>
+  <div *ngIf="authService.currentUser()">
+    <a routerLink="/planet">Aller à ma planète</a>
   </div>
 </div>
