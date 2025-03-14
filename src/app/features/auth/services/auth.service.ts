@@ -38,7 +38,9 @@ export class AuthService {
       tap((res: AuthTokenModel | null) => {
         if (res) {
           this.currentUser.set(res);
+          console.log("current user", res);
           localStorage.setItem('currentUser', JSON.stringify(res));
+          console.log("localStorageUser", localStorage.getItem('currentUser'));
         }
       })
     )

@@ -2,6 +2,8 @@
     private Player owner;
     private List<Building> buildings = new ArrayList<>();
     private Set<RessourceByColony> ressources = new HashSet<>();*/
+import {Location} from './location';
+
 export interface Colony {
   id:number;
   name:string;
@@ -12,5 +14,6 @@ export interface Colony {
   isColonized:boolean;
   population:number;
   originalPlanetId:number;
+  location:Location
 }
 

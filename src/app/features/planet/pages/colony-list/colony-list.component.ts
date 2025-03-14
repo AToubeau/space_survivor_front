@@ -11,4 +11,5 @@ import {CommonModule} from '@angular/common';
 })
 export class ColonyListComponent {
   protected readonly colonyService = inject(ColonyService)
+  colonies = this.colonyService.colonies;
 }
