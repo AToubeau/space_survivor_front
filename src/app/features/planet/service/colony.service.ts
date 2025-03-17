@@ -33,11 +33,11 @@ export class ColonyService {
     this.authService.userLoggedIn.subscribe(() => {
       console.log("✅ L'utilisateur vient de se connecter, chargement des colonies...");
       this.fetchColonies();
+      this.subscribeToColonies();
     })
     if (this.authService.currentUser()) {
       this.fetchColonies();
     }
-
   }
 
   fetchColonies() {
@@ -52,7 +52,7 @@ export class ColonyService {
   }
 
   private subscribeToColonies() {
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}')?.user;
+    const user = JSON.parse(localStorage.getItem('currentUser') || '{}')?.playerResponse;
     if (!user) {
       console.warn("⚠️ Aucun utilisateur connecté, impossible de s'abonner aux colonies.");
       return;
