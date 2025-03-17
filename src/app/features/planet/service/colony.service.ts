@@ -3,6 +3,7 @@ import {Client} from '@stomp/stompjs';
 import {Colony} from '../../../model/colony';
 import {AuthService} from '../../auth/services/auth.service';
 import {HttpClient} from '@angular/common/http';
+import {BehaviorSubject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,9 @@ export class ColonyService {
 
   private readonly http = inject(HttpClient);
   private readonly authService: AuthService = inject(AuthService);
+
+  private colonyDetailSubject = new BehaviorSubject<Colony | null>(null);
+  colonyDetailUpdates$ = this.colonyDetailSubject.asObservable();
 
   constructor() {
     this.client = new Client({
@@ -66,5 +70,9 @@ export class ColonyService {
       console.log(updatedColonies);
     });
     this.client.publish({destination: "/app/updateColonies", body: username})
+  }
+
+  fetchColonyDetail(id: number) {
+    return this.http.get<Colony>(`http://localhost:8080/api/colonies/${id}`);
   }
 }
