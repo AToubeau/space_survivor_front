@@ -12,6 +12,7 @@ export class ColonyService {
   colonies: WritableSignal<Colony[]> = signal([]);
 
   private readonly http = inject(HttpClient);
+  private readonly authService: AuthService = inject(AuthService);
 
   constructor() {
     this.client = new Client({
@@ -28,22 +29,28 @@ export class ColonyService {
     this.client.onWebSocketError = (err) => {
       console.error("❌ Erreur WebSocket", err);
     };
-
     this.client.activate();
-    this.fetchColonies();
+    this.authService.userLoggedIn.subscribe(() => {
+      console.log("✅ L'utilisateur vient de se connecter, chargement des colonies...");
+      this.fetchColonies();
+    })
+    if (this.authService.currentUser()) {
+      this.fetchColonies();
+    }
+
   }
 
   fetchColonies() {
-    console.log("current user in fetch colony : ", localStorage.getItem("currentUser"));
-    const username = JSON.parse(localStorage.getItem('currentUser') || '{}')?.user?.username;
+    const username = JSON.parse(localStorage.getItem('currentUser') || '{}')?.playerResponse.username;
     console.log("username : ", username);
     if (!username) return;
 
-    this.http.get<Colony[]>(`http://localhost:8080/api/colonies/${username}`).subscribe({
+    this.http.get<Colony[]>(`http://localhost:8080/api/colonies/me`).subscribe({
       next: (colonies) => this.colonies.set(colonies),
       error: (err) => console.error("❌ Erreur lors du chargement des colonies", err),
     });
   }
+
   private subscribeToColonies() {
     const user = JSON.parse(localStorage.getItem('currentUser') || '{}')?.user;
     if (!user) {

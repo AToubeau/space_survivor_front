@@ -2,7 +2,7 @@ import {inject, Injectable, signal, WritableSignal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {AuthTokenModel} from '../models/auth-token.model';
 import {AuthCredentialsModel} from '../models/auth-credentials.model';
-import {tap} from 'rxjs';
+import {Subject, tap} from 'rxjs';
 import {environment} from '@env/environment';
 
 @Injectable({
@@ -14,6 +14,8 @@ export class AuthService {
   private readonly API_URL = environment.apiUrl;
 
   currentUser: WritableSignal<AuthTokenModel | null> = signal<AuthTokenModel | null>(null);
+
+  userLoggedIn = new Subject<void>
 
   constructor() {
     const localStorageUser = localStorage.getItem('currentUser');
@@ -28,6 +30,7 @@ export class AuthService {
         if (res) {
           this.currentUser.set(res);
           localStorage.setItem('currentUser', JSON.stringify(res));
+          this.userLoggedIn.next();
         }
       })
     );
