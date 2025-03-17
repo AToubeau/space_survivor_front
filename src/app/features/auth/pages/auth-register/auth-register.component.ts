@@ -57,7 +57,7 @@ export class AuthRegisterComponent {
     this.authService.register(this.registerForm.value).subscribe({
       next: (res) => {
         console.log(this.registerForm.value);
-        this.router.navigate(['/planet']);
+        this.router.navigate(['/planets']);
       },
       error: (err: any)=> {
         this.loginError = "invalid username or password";

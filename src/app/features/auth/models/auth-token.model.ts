@@ -1,6 +1,6 @@
 export interface AuthTokenModel {
   accessToken: string;
-  user : {
+  playerResponse : {
     id: string;
     username: string;
   }
