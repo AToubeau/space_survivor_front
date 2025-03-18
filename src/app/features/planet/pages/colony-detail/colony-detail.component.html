@@ -1,31 +1,31 @@
-<div class="container mx-auto p-6">
-  <div *ngIf="colony; else loading" class="bg-gray-900 rounded-xl shadow-lg p-6">
-    <h2 class="text-3xl text-white font-bold mb-4">
-      Détail de la colonie : {{ colony.name }}
-    </h2>
-    <p class="text-gray-300 mb-6">
-      Population : <span class="font-semibold">{{ colony.population }}</span>
-    </p>
-    <div class="mb-6">
-      <h3 class="text-2xl text-white font-semibold mb-2">Ressources</h3>
-      <ul class="list-disc ml-5 text-gray-300">
-        <li *ngFor="let res of colony.resources">
-          <span class="font-medium">{{ res.type }} :</span> {{ res.quantity }}
-        </li>
-      </ul>
-    </div>
-    <div>
-      <h3 class="text-2xl text-white font-semibold mb-2">Bâtiments</h3>
-      <ul class="list-disc ml-5 text-gray-300">
-        <li *ngFor="let b of colony.buildings">
-          <span class="font-medium">{{ b.name }}</span> - Niveau <span class="font-semibold">{{ b.level }}</span>
-        </li>
-      </ul>
-    </div>
+<div *ngIf="colonyDetail(); else loading" class="bg-gray-900 rounded-xl shadow-lg p-6">
+  <h2 class="text-3xl text-white font-bold mb-4">
+    Détail de la colonie : {{ colonyDetail()?.name }}
+  </h2>
+  <p class="text-gray-300 mb-6">
+    Population : <span class="font-semibold">{{ colonyDetail()?.population }}</span>
+  </p>
+  <div class="mb-6">
+    <h3 class="text-2xl text-white font-semibold mb-2">Ressources</h3>
+    <ul class="list-disc ml-5 text-gray-300">
+      <li *ngFor="let res of colonyDetail()?.resources">
+        <span class="font-medium">{{ res.type }} :</span>
+        {{ res.quantity | number:'1.0-0' }}
+      </li>
+    </ul>
   </div>
-  <ng-template #loading>
-    <div class="flex items-center justify-center h-64">
-      <p class="text-white text-xl">Chargement des informations...</p>
-    </div>
-  </ng-template>
+  <div>
+    <h3 class="text-2xl text-white font-semibold mb-2">Bâtiments</h3>
+    <ul class="list-disc ml-5 text-gray-300">
+      <li *ngFor="let b of colonyDetail()?.buildings">
+        <span class="font-medium">{{ b.name }}</span> - Niveau
+        <span class="font-semibold">{{ b.level }}</span>
+      </li>
+    </ul>
+  </div>
 </div>
+<ng-template #loading>
+  <div class="flex items-center justify-center h-64">
+    <p class="text-white text-xl">Chargement des informations...</p>
+  </div>
+</ng-template>

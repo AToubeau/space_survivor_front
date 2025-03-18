@@ -1,4 +1,4 @@
-import {inject, Injectable, signal, WritableSignal} from '@angular/core';
+import {inject, Injectable, Injector, signal, WritableSignal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {AuthTokenModel} from '../models/auth-token.model';
 import {AuthCredentialsModel} from '../models/auth-credentials.model';
@@ -18,7 +18,8 @@ export class AuthService {
 
   userLoggedIn = new Subject<void>
 
-  colonyService: ColonyService = inject(ColonyService);
+  private injector: Injector = inject(Injector);
+
 
   constructor() {
     const localStorageUser = localStorage.getItem('currentUser');
@@ -55,6 +56,6 @@ export class AuthService {
   logout() {
     this.currentUser.set(null);
     localStorage.removeItem('currentUser');
-    this.colonyService.logout();
+    this.injector.get(ColonyService).logout();
   }
 }

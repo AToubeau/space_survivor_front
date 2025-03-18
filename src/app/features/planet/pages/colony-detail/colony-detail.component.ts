@@ -12,33 +12,17 @@ import {CommonModule} from '@angular/common';
   templateUrl: './colony-detail.component.html',
   styleUrl: './colony-detail.component.scss'
 })
-export class ColonyDetailComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private http = inject(HttpClient);
+export class ColonyDetailComponent {
   private colonyService = inject(ColonyService);
-
-  colony: Colony | null = null;
+  colonyDetail = this.colonyService.colonyDetail
+  private route = inject(ActivatedRoute);
 
   ngOnInit(): void {
-    const colonyId = this.route.snapshot.paramMap.get('id');
-    if (colonyId) {
-      // Chargement initial via REST
-      this.colonyService.fetchColonyDetail(+colonyId).subscribe({
-        next: (data) => {
-          console.log("data in fetchColonnyDetail : ", data);
-          this.colony = data;
-        },
-        error: (err) => console.error("Erreur lors du chargement du détail de la colonie", err)
+    const id = this.route.snapshot.params['id'];
+    if (!this.colonyService.colonyDetail()) {
+      this.colonyService.fetchColonyDetail(id).subscribe((colony) => {
+        this.colonyService.colonyDetail.set(colony);
       });
     }
-
-    // Abonnement aux mises à jour WebSocket
-    this.colonyService.colonyDetailUpdates$.subscribe((updatedColony) => {
-      // Si l'update concerne la colonie affichée, on met à jour l'affichage
-      if (updatedColony && this.colony && updatedColony.id === this.colony.id) {
-        console.log("Mise à jour reçue pour la colonie affichée");
-        this.colony = updatedColony;
-      }
-    });
   }
 }

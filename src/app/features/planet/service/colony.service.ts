@@ -1,4 +1,4 @@
-import {inject, Injectable, Injector, signal, WritableSignal} from '@angular/core';
+import {effect, inject, Injectable, Injector, signal, WritableSignal} from '@angular/core';
 import {Client} from '@stomp/stompjs';
 import {Colony} from '../../../model/colony';
 import {AuthService} from '../../auth/services/auth.service';
@@ -10,13 +10,12 @@ import {BehaviorSubject} from "rxjs";
 })
 export class ColonyService {
   private client: Client;
-  colonies: WritableSignal<Colony[]> = signal([]);
+  colonies: WritableSignal<Colony[]> = signal<Colony[]>([]);
 
   private readonly http = inject(HttpClient);
-  /*private readonly authService: AuthService = inject(AuthService);*/
+  private readonly authService: AuthService = inject(AuthService);
 
-  private colonyDetailSubject = new BehaviorSubject<Colony | null>(null);
-  colonyDetailUpdates$ = this.colonyDetailSubject.asObservable();
+  colonyDetail = signal<Colony|null>(null);
 
   constructor(injector: Injector) {
     this.client = new Client({
@@ -35,30 +34,23 @@ export class ColonyService {
     };
     this.client.activate();
     //ça marche comme ça ?
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')?.playerResponse;
-    if (currentUser && currentUser.username) {
-      console.log("✅ Utilisateur déjà connecté, chargement des colonies...");
-      this.fetchColonies();
-      this.subscribeToColonies();
-    }
-/*    this.authService.userLoggedIn.subscribe(() => {
-      console.log("✅ L'utilisateur vient de se connecter, chargement des colonies...");
-      this.fetchColonies();
-      if (this.client.active) {
-        console.log("Le client est déjà connecté, on lance la souscription...");
-        this.subscribeToColonies();
-      } else {
-        console.log("Le client n'est pas connecté, on attend onConnect...");
+
+    effect(() => {
+      const user =  this.authService.currentUser();
+      if (user) {
+        console.log("L'utilisateur est connecté :  ", user.playerResponse.username)
+        this.fetchColonies();
+/*        console.log("client active : ", this.client.active);
+        if (this.client.active) {
+          this.subscribeToColonies();
+        }*/
       }
-    })
-    if (this.authService.currentUser()) {
-      this.fetchColonies();
-    }*/
+    });
     this.startResourceInterpolation();
   }
 
   fetchColonies() {
-    const username = JSON.parse(localStorage.getItem('currentUser') || '{}')?.playerResponse.username;
+    const username = this.authService.currentUser()?.playerResponse.username;
     console.log("username : ", username);
     if (!username) return;
 
@@ -69,24 +61,26 @@ export class ColonyService {
   }
 
   private subscribeToColonies() {
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}')?.playerResponse;
-    if (!user) {
+    console.log("subscribeToColonies");
+    const user = this.authService.currentUser();
+    console.log("subscribeToColonies", user);
+    if (!user || !user.playerResponse) {
       console.warn("⚠️ Aucun utilisateur connecté, impossible de s'abonner aux colonies.");
       return;
     }
 
-    const username = user.username;
+    const username = user.playerResponse.username;
     console.log(`souscription aux colonies pour ${username}`)
 
     this.client.subscribe(`topic/colonies/${username}`, (message) => {
       const updatedColonies: Colony[] = JSON.parse(message.body);
       console.log("Mise à jour ws reçue : ", updatedColonies);
-      const currentColony = this.colonyDetailSubject.value;
+      const currentColony = this.colonyDetail();
       if (currentColony) {
         const updatedColony = updatedColonies.find(colony => colony.id === currentColony.id);
         if (updatedColony) {
           console.log("Mise à jour pour la colonie détaillé : ", updatedColony)
-          this.colonyDetailSubject.next(updatedColony);
+          this.colonyDetail.set(updatedColony);
         }
       }
 
@@ -100,7 +94,7 @@ export class ColonyService {
 
   private startResourceInterpolation() {
     setInterval(() => {
-      const currentColony = this.colonyDetailSubject.value;
+      const currentColony = this.colonyDetail();
       if (currentColony) {
         const updatedResources = currentColony.resources.map(resource => {
           const productionPerSecond = resource.resourcePerMinute/60
@@ -113,7 +107,7 @@ export class ColonyService {
           ...currentColony,
           resources: updatedResources
         };
-        this.colonyDetailSubject.next(updatedColony);
+        this.colonyDetail.set(updatedColony);
       }
     }, 1000);
   }
