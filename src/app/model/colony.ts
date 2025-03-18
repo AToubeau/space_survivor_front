@@ -17,7 +17,7 @@ export interface Colony {
   population:number;
   originalPlanetId:number;
   location:Location;
-  ressources: RessourceByColony[];
+  resources: RessourceByColony[];
   buildings:Building[];
 }
 
