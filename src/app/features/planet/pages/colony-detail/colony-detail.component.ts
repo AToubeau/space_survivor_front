@@ -5,6 +5,7 @@ import {Observable} from 'rxjs';
 import {Colony} from '../../../../model/colony';
 import {ColonyService} from '../../service/colony.service';
 import {CommonModule} from '@angular/common';
+import {RessourceByColony} from '../../../../model/ressource-by-colony';
 
 @Component({
   selector: 'app-colony-detail',
@@ -12,7 +13,7 @@ import {CommonModule} from '@angular/common';
   templateUrl: './colony-detail.component.html',
   styleUrl: './colony-detail.component.scss'
 })
-export class ColonyDetailComponent {
+export class ColonyDetailComponent implements OnInit {
   private colonyService = inject(ColonyService);
   colonyDetail = this.colonyService.colonyDetail
   private route = inject(ActivatedRoute);
@@ -24,5 +25,9 @@ export class ColonyDetailComponent {
         this.colonyService.colonyDetail.set(colony);
       });
     }
+  }
+
+  getCurrentQuantity(res: RessourceByColony) {
+    return this.colonyService.getCurrentQuantity(res)
   }
 }
