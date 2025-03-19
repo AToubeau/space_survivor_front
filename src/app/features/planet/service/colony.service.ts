@@ -1,47 +1,67 @@
-import {inject, Injectable, signal, WritableSignal} from '@angular/core';
+import {effect, inject, Injectable, Injector, signal, WritableSignal} from '@angular/core';
 import {Client} from '@stomp/stompjs';
 import {Colony} from '../../../model/colony';
 import {AuthService} from '../../auth/services/auth.service';
 import {HttpClient} from '@angular/common/http';
+import {BehaviorSubject} from "rxjs";
+import {RessourceByColony} from '../../../model/ressource-by-colony';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ColonyService {
-  private client: Client;
-  colonies: WritableSignal<Colony[]> = signal([]);
+  private client: Client | null;
+  colonies: WritableSignal<Colony[]> = signal<Colony[]>([]);
 
   private readonly http = inject(HttpClient);
   private readonly authService: AuthService = inject(AuthService);
 
-  constructor() {
+  colonyDetail = signal<Colony|null>(null);
+  currentTime = signal<number>(Date.now());
+
+  stompActive = signal<boolean>(false);
+
+  constructor(injector: Injector) {
+    setInterval(() => {
+      this.currentTime.set(Date.now());
+    }, 1000);
+
+    this.client = null;
+
+    effect(() => {
+      const user =  this.authService.currentUser();
+      if (user && user.playerResponse) {
+        console.log("L'utilisateur est connecté :  ", user.playerResponse.username)
+        this.initializeWS()
+        this.fetchColonies();
+      }
+    });
+  }
+
+  private initializeWS(): void {
+    if (this.client && this.client.active) {
+      console.log("WS déjà actif");
+      return;
+    }
+    console.log("Initialisation du WS");
     this.client = new Client({
-      brokerURL: 'ws://localhost:8080/ws', // 🔥 Assure-toi que c'est bien "ws" et non "wss"
-      reconnectDelay: 5000, // 🔄 Reconnexion automatique après 5 sec
+      brokerURL: 'ws://localhost:8080/ws',
+      reconnectDelay: 5000,
       debug: (msg) => console.log("Websocket debug : ", msg),
     });
-
     this.client.onConnect = () => {
       console.log("✅ WebSocket connecté !");
-      this.subscribeToColonies()
+      this.stompActive.set(true);
+      this.subscribeToColonies();
     };
-
     this.client.onWebSocketError = (err) => {
       console.error("❌ Erreur WebSocket", err);
     };
     this.client.activate();
-    this.authService.userLoggedIn.subscribe(() => {
-      console.log("✅ L'utilisateur vient de se connecter, chargement des colonies...");
-      this.fetchColonies();
-      this.subscribeToColonies();
-    })
-    if (this.authService.currentUser()) {
-      this.fetchColonies();
-    }
   }
 
   fetchColonies() {
-    const username = JSON.parse(localStorage.getItem('currentUser') || '{}')?.playerResponse.username;
+    const username = this.authService.currentUser()?.playerResponse.username;
     console.log("username : ", username);
     if (!username) return;
 
@@ -51,20 +71,48 @@ export class ColonyService {
     });
   }
 
-  private subscribeToColonies() {
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}')?.playerResponse;
-    if (!user) {
+  subscribeToColonies() {
+    console.log("subscribeToColonies");
+    const user = this.authService.currentUser();
+    console.log("subscribeToColonies", user);
+    if (!user || !user.playerResponse) {
       console.warn("⚠️ Aucun utilisateur connecté, impossible de s'abonner aux colonies.");
       return;
     }
 
-    const username = user.username;
+    const username = user.playerResponse.username;
     console.log(`souscription aux colonies pour ${username}`)
 
-    this.client.subscribe(`topic/colonies/${username}`, (message) => {
-      const updatedColonies: Colony[] = JSON.parse(message.body);
-      console.log(updatedColonies);
+    this.client?.subscribe(`/topic/colonies/${username}`, (message) => {
+      const data = JSON.parse(message.body);
+      console.log("Message WS brut reçu :", data);
+      let updatedColonies: Colony[] = Array.isArray(data) ? data : [data];
+      console.log("Traitement comme tableau :", updatedColonies);
+      const currentColony = this.colonyDetail();
+      if (currentColony) {
+        const updatedColony = updatedColonies.find(colony => colony.id === currentColony.id);
+        if (updatedColony) {
+          console.log("Mise à jour pour la colonie détaillée : ", updatedColony);
+          this.colonyDetail.set(updatedColony);
+        }
+      }
     });
-    this.client.publish({destination: "/app/updateColonies", body: username})
+    this.client?.publish({destination: "/app/updateColonies", body: username})
+  }
+
+  fetchColonyDetail(id: number) {
+    return this.http.get<Colony>(`http://localhost:8080/api/colonies/${id}`);
+  }
+
+  getCurrentQuantity(resource: RessourceByColony): number {
+    const lastUpdate  = new Date(resource.updatedAt).getTime();
+    const secondsElapsed = (this.currentTime() - lastUpdate)/1000;
+    const productionPerSecond = resource.resourcePerMinute / 60;
+
+    return resource.quantity + productionPerSecond * secondsElapsed;
+  }
+
+  logout() {
+    this.client?.deactivate()
   }
 }

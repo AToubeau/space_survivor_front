@@ -1,9 +1,10 @@
-import {inject, Injectable, signal, WritableSignal} from '@angular/core';
+import {inject, Injectable, Injector, signal, WritableSignal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {AuthTokenModel} from '../models/auth-token.model';
 import {AuthCredentialsModel} from '../models/auth-credentials.model';
 import {Subject, tap} from 'rxjs';
 import {environment} from '@env/environment';
+import {ColonyService} from '../../planet/service/colony.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,9 @@ export class AuthService {
   currentUser: WritableSignal<AuthTokenModel | null> = signal<AuthTokenModel | null>(null);
 
   userLoggedIn = new Subject<void>
+
+  private injector: Injector = inject(Injector);
+
 
   constructor() {
     const localStorageUser = localStorage.getItem('currentUser');
@@ -52,5 +56,6 @@ export class AuthService {
   logout() {
     this.currentUser.set(null);
     localStorage.removeItem('currentUser');
+    this.injector.get(ColonyService).logout();
   }
 }

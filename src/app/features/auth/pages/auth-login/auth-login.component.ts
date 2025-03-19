@@ -64,7 +64,12 @@ export class AuthLoginComponent {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (res) => {
-        this.router.navigate(['/colonies']);
+        if (res) {
+          this.router.navigate(['/colonies']);
+        }else {
+          this.router.navigate(['/']);
+        }
+
       },
       error: (err: any)=> {
         this.loginError = "invalid username or password";
