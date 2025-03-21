@@ -1,5 +1,7 @@
 export interface Building{
   id: number;
-  name: string;
+  type: string;
   level: number;
+  upgradeCostMetal:number;
+  upgradeCostWater:number;
 }

@@ -3,7 +3,7 @@ import {Client} from '@stomp/stompjs';
 import {Colony} from '../../../model/colony';
 import {AuthService} from '../../auth/services/auth.service';
 import {HttpClient} from '@angular/common/http';
-import {BehaviorSubject} from "rxjs";
+import {BehaviorSubject, Observable} from "rxjs";
 import {RessourceByColony} from '../../../model/ressource-by-colony';
 
 @Injectable({
@@ -114,5 +114,9 @@ export class ColonyService {
 
   logout() {
     this.client?.deactivate()
+  }
+
+  upgradeBuilding(colonyId: number, type: string) :Observable<void> {
+    return this.http.post<void>(`http://localhost:8080/api/buildings/upgrade/${colonyId}/${type}`, null)
   }
 }
