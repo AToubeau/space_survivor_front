@@ -1,6 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AuthService} from '../../../auth/services/auth.service';
 
 @Component({
@@ -8,6 +8,7 @@ import {AuthService} from '../../../auth/services/auth.service';
   imports: [
     RouterLink,
     CommonModule,
+    NgOptimizedImage,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
