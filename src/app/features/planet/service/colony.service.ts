@@ -1,4 +1,4 @@
-import {effect, inject, Injectable, Injector, signal, WritableSignal} from '@angular/core';
+import {computed, effect, inject, Injectable, Injector, signal, WritableSignal} from '@angular/core';
 import {Client} from '@stomp/stompjs';
 import {Colony} from '../../../model/colony';
 import {AuthService} from '../../auth/services/auth.service';
@@ -20,6 +20,7 @@ export class ColonyService {
   currentTime = signal<number>(Date.now());
 
   stompActive = signal<boolean>(false);
+  resources = computed(() => this.colonyDetail()?.resources ?? []);
 
   constructor(injector: Injector) {
     setInterval(() => {
