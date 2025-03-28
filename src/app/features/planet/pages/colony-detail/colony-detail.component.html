@@ -5,15 +5,6 @@
   <p class="text-gray-300 mb-6">
     Population : <span class="font-semibold">{{ colony()?.population }}</span>
   </p>
-  <div class="mb-6">
-    <h3 class="text-2xl text-white font-semibold mb-2">Ressources</h3>
-    <ul class="list-disc ml-5 text-gray-300">
-      <li *ngFor="let res of colony()?.resources">
-        <span class="font-medium">{{ res.type }} :</span>
-        {{ getCurrentQuantity(res) | number:'1.0-0' }}
-      </li>
-    </ul>
-  </div>
   <app-building-card
     *ngFor="let b of colony()?.buildings"
     [building]="b"

@@ -101,10 +101,6 @@ export class ColonyService {
     this.client?.publish({destination: "/app/updateColonies", body: username})
   }
 
-  fetchColonyDetail(id: number) {
-    return this.http.get<Colony>(`http://localhost:8080/api/colonies/${id}`);
-  }
-
   getCurrentQuantity(resource: RessourceByColony): number {
     const lastUpdate  = new Date(resource.updatedAt).getTime();
     const secondsElapsed = (this.currentTime() - lastUpdate)/1000;

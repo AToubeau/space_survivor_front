@@ -13,13 +13,9 @@ import {ColonyContextService} from '../../features/planet/service/colony-context
   template: `
     <nav class="bg-gray-900 text-white p-4 flex justify-between items-center">
       <h1 class="text-xl font-bold">Space Survivor</h1>
-      <div *ngIf="showResources && resources().length === 0" class="text-red-500">
-        Aucune ressource à afficher
-      </div>
-
       <div *ngIf="showResources" class="flex space-x-4 items-center">
         <div *ngFor="let res of resources()" class="relative group">
-          <span class="ml-1">{{ res.type }} : {{ res.quantity | number:'1.0-0' }}</span>
+          <span class="ml-1">{{ res.type }} : {{ getCurrentQuantity(res) | number:"1.0-0"}}</span>
           <div
             class="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition">
             +{{ res.resourcePerMinute }}/min
@@ -63,5 +59,9 @@ export class NavbarComponent implements OnInit {
   logout() {
     this.authService.logout();
     this.router.navigate(['/']);
+  }
+
+  getCurrentQuantity(res: RessourceByColony):number {
+    return this.colonyContext.getCurrentQuantity(res)
   }
 }

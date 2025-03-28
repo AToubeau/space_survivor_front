@@ -1,5 +1,6 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {ColonyService} from './colony.service';
+import {RessourceByColony} from '../../../model/ressource-by-colony';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,11 @@ export class ColonyContextService {
     this.selectedColonyId.set(id);
   }
 
-  cleaSelection() {
+  clearSelection() {
     this.selectedColonyId.set(null);
+  }
+
+  getCurrentQuantity(res: RessourceByColony):number {
+    return this.colonyService.getCurrentQuantity(res)
   }
 }
