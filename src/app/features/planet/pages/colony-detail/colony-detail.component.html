@@ -6,12 +6,12 @@
     Population : <span class="font-semibold">{{ colony()?.population }}</span>
   </p>
   <app-building-card
-    *ngFor="let b of colony()?.buildings"
-    [building]="b"
-    [availableWater]="getResource('Water')"
-    [availableMetal]="getResource('Metal')"
-    (upgrade)="handleUpgrade($event)"
-  ></app-building-card>
+  *ngFor="let b of sortedBuildings()"
+  [building]="b"
+  [availableWater]="getResource('Water')"
+  [availableMetal]="getResource('Metal')"
+  (upgrade)="handleUpgrade($event)"
+></app-building-card>
 </div>
 <ng-template #loading>
   <div class="flex items-center justify-center h-64">

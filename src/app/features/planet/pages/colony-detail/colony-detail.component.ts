@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, computed, inject, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ColonyService} from '../../service/colony.service';
 import {CommonModule} from '@angular/common';
@@ -18,6 +18,14 @@ export class ColonyDetailComponent implements OnInit {
   private colonyContext = inject(ColonyContextService);
 
   colony = this.colonyContext.selectedColony;
+
+  sortedBuildings = computed(() => {
+    const col = this.colony();
+    const order = ["WATER_PUMP", "METAL_MINE", "HYDROGEN_REFINERY"];
+    return col
+      ? [...col.buildings].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type))
+      : [];
+  })
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.params['id']);

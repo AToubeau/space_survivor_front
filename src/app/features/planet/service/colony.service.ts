@@ -5,6 +5,7 @@ import {AuthService} from '../../auth/services/auth.service';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, Observable} from "rxjs";
 import {RessourceByColony} from '../../../model/ressource-by-colony';
+import {ColonyContextService} from './colony-context.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,12 +16,20 @@ export class ColonyService {
 
   private readonly http = inject(HttpClient);
   private readonly authService: AuthService = inject(AuthService);
+  private pendingSubscriptions: (() => void)[] = [];
+  private executeOrQueueSubscription(callback: () => void): void {
+    if (this.client?.connected) {
+      callback();
+    } else {
+      this.pendingSubscriptions.push(callback);
+    }
+  }
 
-  colonyDetail = signal<Colony|null>(null);
+  //colonyDetail = signal<Colony|null>(null);
   currentTime = signal<number>(Date.now());
 
   stompActive = signal<boolean>(false);
-  resources = computed(() => this.colonyDetail()?.resources ?? []);
+  //resources = computed(() => this.colonyDetail()?.resources ?? []);
 
   constructor(injector: Injector) {
     setInterval(() => {
@@ -54,6 +63,8 @@ export class ColonyService {
       console.log("✅ WebSocket connecté !");
       this.stompActive.set(true);
       this.subscribeToColonies();
+      this.pendingSubscriptions.forEach(callback => callback());
+      this.pendingSubscriptions = [];
     };
     this.client.onWebSocketError = (err) => {
       console.error("❌ Erreur WebSocket", err);
@@ -89,16 +100,28 @@ export class ColonyService {
       console.log("Message WS brut reçu :", data);
       let updatedColonies: Colony[] = Array.isArray(data) ? data : [data];
       console.log("Traitement comme tableau :", updatedColonies);
-      const currentColony = this.colonyDetail();
-      if (currentColony) {
-        const updatedColony = updatedColonies.find(colony => colony.id === currentColony.id);
-        if (updatedColony) {
-          console.log("Mise à jour pour la colonie détaillée : ", updatedColony);
-          this.colonyDetail.set(updatedColony);
-        }
-      }
+      this.colonies.set(updatedColonies);
     });
     this.client?.publish({destination: "/app/updateColonies", body: username})
+  }
+
+  subscribeToColonyDetail(callback : (updated: Colony) => void) {
+    console.log("test subscribeToColonyDetail in service");
+    this.executeOrQueueSubscription(() => {
+      const user = this.authService.currentUser();
+      if (!user || !user.playerResponse) {
+        console.warn("⚠️ Aucun utilisateur connecté, impossible de s'abonner aux colonies.");
+
+        return;
+      }
+
+      const username = user.playerResponse.username;
+      this.client?.subscribe(`/topic/colony/${username}`, (message) => {
+        const updatedColony: Colony = JSON.parse(message.body);
+        console.log("update de colony via ws. colony : ", updatedColony);
+        callback(updatedColony);
+      });
+    });
   }
 
   getCurrentQuantity(resource: RessourceByColony): number {

@@ -38,13 +38,16 @@ export class NavbarComponent implements OnInit {
 
   resources: Signal<(RessourceByColony & { icon: string })[]> = computed(() => {
     const colony = this.colonyContext.selectedColony();
+    const order = ["Water", "Metal", "Hydrogen"];
     return colony
       ? colony.resources.map((r) => ({
         ...r,
         icon: `assets/icons/${r.type.toLowerCase()}.png`,
-      }))
+      })).sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type))
       : [];
   });
+
+
 
   ngOnInit(): void {
     this.router.events
