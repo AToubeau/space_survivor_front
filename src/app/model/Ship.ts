@@ -1,5 +1,5 @@
 export interface Ship{
-  id: string;
+  id: number;
   type: string;
   baseAttackPower: number;
   baseDefensePower: number;

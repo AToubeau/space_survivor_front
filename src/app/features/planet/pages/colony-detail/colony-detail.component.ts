@@ -5,10 +5,11 @@ import {CommonModule} from '@angular/common';
 import {RessourceByColony} from '../../../../model/ressource-by-colony';
 import {BuildingCardComponent} from '../../components/building-card/building-card.component';
 import {ColonyContextService} from '../../service/colony-context.service';
+import {ColonyNavComponent} from '../../../../layout/colonyNav/colonynav.component';
 
 @Component({
   selector: 'app-colony-detail',
-  imports: [CommonModule, BuildingCardComponent],
+  imports: [CommonModule, BuildingCardComponent, ColonyNavComponent],
   templateUrl: './colony-detail.component.html',
   styleUrl: './colony-detail.component.scss'
 })

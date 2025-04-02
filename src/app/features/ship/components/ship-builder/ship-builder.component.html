@@ -1,14 +1,36 @@
-<h2 class="text-xl font-bold mb-4">Construction de vaisseaux</h2>
-<div *ngFor="let ship of ships()" class="mb-4 border p-4 rounded bg-gray-800 text-white">
-  <div class="flex items-center gap-4">
-    <img [src]="'assets/images/ships/' + ship.name.toLowerCase() + '.png'"
-         [alt]="ship"
-         class="w-16 h-16 rounded bg-gray-700 object-contain">
-    <div>
-      <h3 class="font-semibold text-lg">{{ ship.name }}</h3>
-      <p>{{ ship.description }}</p>
-      <label>Quantité: <input type="number" [(ngModel)]="ship.quantity" min="0" class="bg-gray-700 p-1 rounded w-20"></label>
+<div class="p-4 space-y-6">
+  <app-colony-nav />
+  <div *ngFor="let ship of ships()" class="bg-gray-800 text-white p-4 rounded shadow">
+    <div class="flex justify-between items-center">
+      <div>
+        <h2 class="text-xl font-bold mb-1">{{ ship.type }}</h2>
+        <p class="text-sm text-gray-300">Attaque: {{ ship.baseAttackPower }}, Défense: {{ ship.baseDefensePower }}</p>
+        <p class="text-sm text-gray-300">Stockage: {{ ship.storageCapacity }}, Vitesse: {{ ship.speed }}</p>
+        <p class="text-sm text-gray-300">Disponible: {{ getQuantityForShip(ship.id) }}</p>
+        <p class="text-sm text-gray-300">
+          Coût unitaire - 💧 {{ ship.costWater }} | 🪨 {{ ship.costMetal }} | ⚡ {{ ship.costHydrogen }}
+        </p>
+        <div class="mt-2 text-sm">
+          <span *ngIf="getMaxBuildable(ship) > 0" class="text-green-400">Constr. max: {{ getMaxBuildable(ship) }}</span>
+          <span *ngIf="getMaxBuildable(ship) === 0" class="text-red-400">Ressources insuffisantes</span>
+        </div>
+      </div>
+      <div class="text-right">
+        <label class="block text-sm">Quantité à construire :</label>
+        <input type="number" min="0"
+               [max]="getMaxBuildable(ship)"
+               [value]="getSelectedQuantity(ship.id)"
+               (input)="updateQuantity(ship.id, $any($event.target).value)"
+               class="w-20 p-1 bg-gray-700 text-white rounded border border-gray-600">
+      </div>
     </div>
   </div>
+
+  <div class="text-right">
+    <button (click)="buildShips()"
+            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow disabled:opacity-50"
+            [disabled]="!canBuild()">
+      Construire
+    </button>
+  </div>
 </div>
-<button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded" (click)="buildShips()">Construire</button>

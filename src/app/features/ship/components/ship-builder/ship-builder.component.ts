@@ -1,74 +1,100 @@
-import {Component, computed, inject, signal, WritableSignal} from '@angular/core';
+import {Component, computed, effect, inject, OnInit, signal, WritableSignal} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ShipService} from '../../service/ship.service';
 import {ColonyContextService} from '../../../planet/service/colony-context.service';
 import {FormsModule} from '@angular/forms';
-import {NgForOf, NgOptimizedImage} from '@angular/common';
+import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
 import {Ship} from '../../../../model/Ship';
+import {ShipCreateRequest} from '../../../../model/ShipCreateRequest';
+import {ColonyNavComponent} from '../../../../layout/colonyNav/colonynav.component';
 
 @Component({
   selector: 'app-ship-builder',
   imports: [
     FormsModule,
     NgForOf,
+    NgIf,
+    ColonyNavComponent,
   ],
   templateUrl: './ship-builder.component.html',
   styleUrl: './ship-builder.component.scss'
 })
-export class ShipBuilderComponent {
-  private colonyContext = inject(ColonyContextService);
-  private shipService = inject(ShipService);
+export class ShipBuilderComponent /*implements OnInit*/ {
+  private readonly colonyContext = inject(ColonyContextService);
+  private readonly shipService = inject(ShipService);
 
-  colony = this.colonyContext.selectedColony;
-  ships = this.shipService.shipsByColony;
-  availableResources = computed(() => this.colony()?.resources ?? []);
+  readonly ships = signal<Ship[]>([]);
+  availableShips = this.shipService.shipsByColony;
+  selectedQuantities = signal<Record<number, number>>({});
 
-  shipList: Ship[] = [];
-  formValues: WritableSignal<Record<number, number>> = signal({}); // shipId -> quantity
+  colonyId = computed(() => this.colonyContext.selectedColony()?.id ?? 0);
+  colonyResources = computed(() => this.colonyContext.selectedColony()?.resources ?? []);
+  private readonly route = inject(ActivatedRoute);
 
   constructor() {
-    this.shipService.fetchShipsByColony(this.colony()?.id ?? 0);
+    const id = Number(this.route.snapshot.params['id']);
+    this.colonyContext.selectColony(id);
+
+    effect(() => {
+      const id = this.colonyContext.selectedColony()?.id;
+      if (id) {
+        this.shipService.fetchShipsByColony(id);
+        this.shipService.fetchAllShips().subscribe({
+          next: (data) => {
+            console.log("data in shipBuilder effect: ", data);
+            this.ships.set(data);
+          },
+        });
+      }
+    });
   }
 
-  getCurrentQuantity(shipId: number): number {
-    return this.ships().find(s => s.shipId === shipId)?.quantity ?? 0;
+  getQuantityForShip(shipId: number): number {
+    return this.availableShips().find(s => s.shipId === shipId)?.quantity ?? 0;
+  }
+
+  getSelectedQuantity(shipId: number): number {
+    return this.selectedQuantities()[shipId] ?? 0;
+  }
+
+  updateQuantity(shipId: number, value: number) {
+    const updated = { ...this.selectedQuantities() };
+    updated[shipId] = Number(value);
+    this.selectedQuantities.set(updated);
   }
 
   getMaxBuildable(ship: Ship): number {
-    const currentFormValues = this.formValues();
-    const selectedSoFar = Object.entries(currentFormValues).reduce((acc, [id, qty]) => {
-      const s = this.shipList.find(s => s.id === id);
-      if (!s) return acc;
-      acc.water += s.costWater * qty;
-      acc.metal += s.costMetal * qty;
-      acc.hydrogen += s.costHydrogen * qty;
-      return acc;
-    }, { water: 0, metal: 0, hydrogen:0 });
+    const resources = this.colonyResources();
+    const water = resources.find(r => r.type === 'Water')?.quantity ?? 0;
+    const metal = resources.find(r => r.type === 'Metal')?.quantity ?? 0;
+    const hydrogen = resources.find(r => r.type === 'Hydrogen')?.quantity ?? 0;
 
-    const colonyResources = this.availableResources();
-    const availableWater = colonyResources.find(r => r.type === 'Water')?.quantity ?? 0;
-    const availableMetal = colonyResources.find(r => r.type === 'Metal')?.quantity ?? 0;
+    const maxWater = ship.costWater ? Math.floor(water / ship.costWater) : Infinity;
+    const maxMetal = ship.costMetal ? Math.floor(metal / ship.costMetal) : Infinity;
+    const maxHydro = ship.costHydrogen ? Math.floor(hydrogen / ship.costHydrogen) : Infinity;
 
-    const maxWater = Math.floor((availableWater - selectedSoFar.water) / ship.costWater);
-    const maxMetal = Math.floor((availableMetal - selectedSoFar.metal) / ship.costMetal);
-    return Math.max(0, Math.min(maxWater, maxMetal));
+    return Math.max(0, Math.min(maxWater, maxMetal, maxHydro));
   }
 
-  onInput(shipId: number, quantity: number) {
-    const newForm = { ...this.formValues() };
-    newForm[shipId] = quantity;
-    this.formValues.set(newForm);
+  canBuild(): boolean {
+    return Object.values(this.selectedQuantities()).some(q => q > 0);
   }
 
   buildShips() {
-    const payload = Object.entries(this.formValues()).map(([shipId, quantity]) => ({
-      shipId: +shipId,
-      colonyId: this.colony()?.id ?? 0,
-      quantity: quantity
-    }));
-    this.shipService.createShips(payload).subscribe(() => {
-      this.shipService.fetchShipsByColony(this.colony()?.id ?? 0);
-      this.formValues.set({});
-    });
+    const colonyId = this.colonyId();
+    const payload: ShipCreateRequest[] = Object.entries(this.selectedQuantities())
+      .filter(([_, qty]) => qty > 0)
+      .map(([shipId, quantity]) => ({
+        colonyId,
+        shipId:Number(shipId),
+        quantity,
+      }));
+
+    if (payload.length > 0) {
+      this.shipService.createShips(payload).subscribe(() => {
+        this.shipService.fetchShipsByColony(colonyId);
+        this.selectedQuantities.set({});
+      });
+    }
   }
 }
