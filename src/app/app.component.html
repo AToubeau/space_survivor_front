@@ -1,4 +1,6 @@
 <main>
-  <app-navbar *ngIf="isLoggedIn()"></app-navbar>
-  <router-outlet></router-outlet>
+  <div class="min-h-screen w-full bg-cover bg-center bg-no-repeat" style="background-image: url('assets/images/background.png')">
+    <app-navbar *ngIf="isLoggedIn()"></app-navbar>
+    <router-outlet></router-outlet>
+  </div>
 </main>

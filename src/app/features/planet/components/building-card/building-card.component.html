@@ -1,0 +1,23 @@
+<div class="bg-gray-800 rounded-xl p-4 shadow-md flex items-center gap-4">
+  <img
+    [src]="'assets/images/' + building.type.toLowerCase() + '.png'"
+    [alt]="building.type"
+    class="w-16 h-16 rounded bg-gray-700 object-contain"
+  />
+
+  <div class="flex-grow">
+    <h3 class="text-white text-xl font-bold">{{ building.type }}</h3>
+    <p class="text-gray-300">Niveau : {{ building.level }}</p>
+    <p class="text-gray-400 text-sm">
+      💧 Eau : {{ getUpgradeCost().water }} | 🪙 Métal : {{ getUpgradeCost().metal }}
+    </p>
+  </div>
+
+  <button
+    class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-semibold disabled:opacity-50"
+    [disabled]="!canUpgrade()"
+    (click)="onUpgrade()"
+  >
+    🔼 Améliorer
+  </button>
+</div>
