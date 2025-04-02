@@ -1,0 +1,14 @@
+<h2 class="text-xl font-bold mb-4">Construction de vaisseaux</h2>
+<div *ngFor="let ship of ships()" class="mb-4 border p-4 rounded bg-gray-800 text-white">
+  <div class="flex items-center gap-4">
+    <img [src]="'assets/images/ships/' + ship.name.toLowerCase() + '.png'"
+         [alt]="ship"
+         class="w-16 h-16 rounded bg-gray-700 object-contain">
+    <div>
+      <h3 class="font-semibold text-lg">{{ ship.name }}</h3>
+      <p>{{ ship.description }}</p>
+      <label>Quantité: <input type="number" [(ngModel)]="ship.quantity" min="0" class="bg-gray-700 p-1 rounded w-20"></label>
+    </div>
+  </div>
+</div>
+<button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded" (click)="buildShips()">Construire</button>

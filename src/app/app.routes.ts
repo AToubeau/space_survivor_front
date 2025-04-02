@@ -31,5 +31,11 @@ export const routes: Routes = [
     loadComponent: () => import("./features/planet/pages/colony-detail/colony-detail.component")
       .then(c => c.ColonyDetailComponent),
     canActivate:[isUserConnectedGuard]
+  },
+  {
+    path: "colonies/:id/ships",
+    loadComponent: () => import("./features/ship/components/ship-builder/ship-builder.component")
+      .then(c => c.ShipBuilderComponent),
+    canActivate:[isUserConnectedGuard]
   }
 ];
