@@ -2,17 +2,24 @@
   <app-colony-nav />
   <div *ngFor="let ship of ships()" class="bg-gray-800 text-white p-4 rounded shadow">
     <div class="flex justify-between items-center">
-      <div>
-        <h2 class="text-xl font-bold mb-1">{{ ship.type }}</h2>
-        <p class="text-sm text-gray-300">Attaque: {{ ship.baseAttackPower }}, Défense: {{ ship.baseDefensePower }}</p>
-        <p class="text-sm text-gray-300">Stockage: {{ ship.storageCapacity }}, Vitesse: {{ ship.speed }}</p>
-        <p class="text-sm text-gray-300">Disponible: {{ getQuantityForShip(ship.id) }}</p>
-        <p class="text-sm text-gray-300">
-          Coût unitaire - 💧 {{ ship.costWater }} | 🪨 {{ ship.costMetal }} | ⚡ {{ ship.costHydrogen }}
-        </p>
-        <div class="mt-2 text-sm">
-          <span *ngIf="getMaxBuildable(ship) > 0" class="text-green-400">Constr. max: {{ getMaxBuildable(ship) }}</span>
-          <span *ngIf="getMaxBuildable(ship) === 0" class="text-red-400">Ressources insuffisantes</span>
+      <div class="flex items-start space-x-4">
+        <img
+          [src]="'assets/images/ships/' + ship.type.toLowerCase() + '.png'"
+          [alt]="ship.type"
+          class="w-20 h-20 rounded bg-gray-700 object-contain"
+        />
+        <div>
+          <h2 class="text-xl font-bold mb-1">{{ ship.type }}</h2>
+          <p class="text-sm text-gray-300">Attaque: {{ ship.baseAttackPower }}, Défense: {{ ship.baseDefensePower }}</p>
+          <p class="text-sm text-gray-300">Stockage: {{ ship.storageCapacity }}, Vitesse: {{ ship.speed }}</p>
+          <p class="text-sm text-gray-300">Disponible: {{ getQuantityForShip(ship.id) }}</p>
+          <p class="text-sm text-gray-300">
+            Coût unitaire - 💧 {{ ship.costWater }} | 🪨 {{ ship.costMetal }} | ⚡ {{ ship.costHydrogen }}
+          </p>
+          <div class="mt-2 text-sm">
+            <span *ngIf="getMaxBuildable(ship) > 0" class="text-green-400">Constr. max: {{ getMaxBuildable(ship) }}</span>
+            <span *ngIf="getMaxBuildable(ship) === 0" class="text-red-400">Ressources insuffisantes</span>
+          </div>
         </div>
       </div>
       <div class="text-right">
