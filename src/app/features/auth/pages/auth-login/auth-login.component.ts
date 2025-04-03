@@ -53,7 +53,6 @@ export class AuthLoginComponent {
   loginError: string | null = null;
 
   constructor() {
-    console.log("constructor")
     this.loginForm = this.formBuilder.group({
       username: [null, [Validators.required, Validators.minLength(5)]],
       password: [null, [Validators.required, Validators.minLength(6)]],
