@@ -2,10 +2,10 @@ import {ChangeDetectorRef, Component, computed, effect, inject, OnInit, Signal} 
 import {AuthService} from '../../features/auth/services/auth.service';
 import {NavigationEnd, Router, RouterModule} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {ColonyService} from '../../features/planet/service/colony.service';
+import {ColonyService} from '../../features/colony/service/colony.service';
 import {filter} from 'rxjs';
 import {RessourceByColony} from '../../model/ressource-by-colony';
-import {ColonyContextService} from '../../features/planet/service/colony-context.service';
+import {ColonyContextService} from '../../features/colony/service/colony-context.service';
 
 @Component({
   selector: 'app-navbar',

@@ -1,7 +1,7 @@
 import {Component, computed, effect, inject, OnInit, signal, WritableSignal} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ShipService} from '../../service/ship.service';
-import {ColonyContextService} from '../../../planet/service/colony-context.service';
+import {ColonyContextService} from '../../../colony/service/colony-context.service';
 import {FormsModule} from '@angular/forms';
 import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
 import {Ship} from '../../../../model/Ship';

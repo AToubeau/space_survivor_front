@@ -11,9 +11,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(cloned).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        // Redirige vers login si token invalide
+        console.warn('🔐 Token expiré ou invalide, déconnexion en cours...');
         localStorage.removeItem('currentUser');
-        window.location.href = '/auth/login';
+        window.location.href = '/login'; // ou utilise Router si t'es dans une classe
       }
       return throwError(() => error);
     })

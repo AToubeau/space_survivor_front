@@ -4,7 +4,7 @@ import {AuthTokenModel} from '../models/auth-token.model';
 import {AuthCredentialsModel} from '../models/auth-credentials.model';
 import {Subject, tap} from 'rxjs';
 import {environment} from '@env/environment';
-import {ColonyService} from '../../planet/service/colony.service';
+import {ColonyService} from '../../colony/service/colony.service';
 
 @Injectable({
   providedIn: 'root'
